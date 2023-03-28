@@ -2,7 +2,7 @@
  * @file symbolTable.h
  * @author Cyh__Cky (1245532616@qq.com)
  * @brief 符号表定义
- * @version 0.1
+ * @version 0.13
  * @date 2023-03-28
  */
 #ifndef SYMBOLTABLE_H
