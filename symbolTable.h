@@ -1,5 +1,5 @@
 /**
- * @file symbolTAble.h
+ * @file symbolTable.h
  * @author Cyh__Cky (1245532616@qq.com)
  * @brief 符号表定义
  * @version 0.1
