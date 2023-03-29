@@ -34,11 +34,11 @@ public:
 	
 
 	void setParaValRecord(string id,int line,string detailedType);
-	void setParaVarRecord(string id,int line,string detailedtype);
-	void setVarRecord(string id,int line,string detailedtype);
-	void setConstRecord(string id,int line,string detailedtype,string value);
-	void setArrayRecord(string id,int line,string detailedtype,int numDimensionsOfArray,vector<pair<int,int>> boundsOfArray);
-	void setFuncRecord(string id,int line,string detailedtype,int numOfFunc,_SymbolTable* subSymbolTable);
+	void setParaVarRecord(string id,int line,string detailedType);
+	void setVarRecord(string id,int line,string detailedType);
+	void setConstRecord(string id,int line,string detailedType,string value);
+	void setArrayRecord(string id,int line,string detailedType,int numDimensionsOfArray,vector<pair<int,int>> boundsOfArray);
+	void setFuncRecord(string id,int line,string detailedType,int numOfFunc,_SymbolTable* subSymbolTable);
 	void setProcRecord(string id,int line,int numOfFunc,_SymbolTable* subSymbolTable);
 	void setVoidRecord(string id,int line);
 	_SymbolRecord()
