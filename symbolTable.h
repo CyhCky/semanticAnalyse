@@ -217,6 +217,25 @@ public:
 	~_SymbolTable(){}
 
 	/**
+	 * @brief 使用id判断对应记录是否存在
+	 * 
+	 * @param id 
+	 * @return true 
+	 * @return false 
+	 */
+	bool isRecordExistForId(string id);
+
+	/**
+	 * @brief 使用id得到对应的记录
+	 * 
+	 * @param id 
+	 * @param record 记录返回位置，引用调用
+	 * @return true 成功得到对应记录
+	 * @return false 未成功找到对应记录
+	 */
+	bool convertIdToRecord(string id,_SymbolRecord &record);
+
+	/**
 	 * @brief 判断一个id在该符号表中是否合法,合法返回true,非法返回false
 	 * 
 	 * @param id 
@@ -224,5 +243,15 @@ public:
 	 * @return false 
 	 */
 	bool isVaildid(string id);
+
+	/**
+	 * @brief 判断数组下标是否合法
+	 * 
+	 * @param id 数组id
+	 * @param index 下标
+	 * @return true 
+	 * @return false 
+	 */
+	bool isIndexInRange(string id,int index);
 };
 #endif
