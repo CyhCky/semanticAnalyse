@@ -68,7 +68,6 @@ public:
 	void insertArrayRecord(string id,int line,string detailedType,int numDimensionsOfArray,vector<pair<int,int>> boundsOfArray);
 	void insertFuncRecord(string id,int line,string detailedType,int numOfFunc,_SymbolTable* subSymbolTable);
 	void insertProcRecord(string id,int line,int numOfFunc,_SymbolTable* subSymbolTable);
-	void insertSubSymbolTable(string id,_SymbolTable* subSymbolTable);
 	void insertsParaMainRecord(string id,int line);
 	_SymbolTable()
 	{
