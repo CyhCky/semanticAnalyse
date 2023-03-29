@@ -40,7 +40,7 @@ public:
 	void setArrayRecord(string id,int line,string detailedType,int numDimensionsOfArray,vector<pair<int,int>> boundsOfArray);
 	void setFuncRecord(string id,int line,string detailedType,int numOfFunc,_SymbolTable* subSymbolTable);
 	void setProcRecord(string id,int line,int numOfFunc,_SymbolTable* subSymbolTable);
-	void setVoidRecord(string id,int line);
+	void setParaMainRecord(string id,int line);
 	_SymbolRecord()
 	{
 		boundsOfArray.clear();
