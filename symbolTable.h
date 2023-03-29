@@ -40,7 +40,7 @@ public:
 	void setArrayRecord(string id,int line,string detailedType,int numDimensionsOfArray,vector<pair<int,int>> boundsOfArray);
 	void setFuncRecord(string id,int line,string detailedType,int numOfFunc,_SymbolTable* subSymbolTable);
 	void setProcRecord(string id,int line,int numOfFunc,_SymbolTable* subSymbolTable);
-	void setVoidRecord(string id,int line);
+	void setParaMainRecord(string id,int line);
 	_SymbolRecord()
 	{
 		boundsOfArray.clear();
@@ -62,14 +62,13 @@ public:
 	map<string,int> idToLoc;//使用id快速定位符号表中对应记录存放位置
 
 	void insertParaValRecord(string id,int line,string detailedType);
-	void insertParaVarRecord(string id,int line,string detailedtype);
-	void insertVarRecord(string id,int line,string detailedtype);
-	void insertConstRecord(string id,int line,string detailedtype,string value);
-	void insertArrayRecord(string id,int line,string detailedtype,int numDimensionsOfArray,vector<pair<int,int>> boundsOfArray);
-	void insertFuncRecord(string id,int line,string detailedtype,int numOfFunc,_SymbolTable* subSymbolTable);
+	void insertParaVarRecord(string id,int line,string detailedType);
+	void insertVarRecord(string id,int line,string detailedType);
+	void insertConstRecord(string id,int line,string detailedType,string value);
+	void insertArrayRecord(string id,int line,string detailedType,int numDimensionsOfArray,vector<pair<int,int>> boundsOfArray);
+	void insertFuncRecord(string id,int line,string detailedType,int numOfFunc,_SymbolTable* subSymbolTable);
 	void insertProcRecord(string id,int line,int numOfFunc,_SymbolTable* subSymbolTable);
-	void insertSubSymbolTable(string id,_SymbolTable* subSymbolTable);
-	void insertVoidRecord(string id,int line);
+	void insertsParaMainRecord(string id,int line);
 	_SymbolTable()
 	{
 		isMainTable = false;
