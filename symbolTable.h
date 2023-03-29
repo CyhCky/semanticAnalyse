@@ -69,7 +69,7 @@ public:
 	void insertFuncRecord(string id,int line,string detailedtype,int numOfFunc,_SymbolTable* subSymbolTable);
 	void insertProcRecord(string id,int line,int numOfFunc,_SymbolTable* subSymbolTable);
 	void insertSubSymbolTable(string id,_SymbolTable* subSymbolTable);
-	void insertVoidRecord(string id,int line);
+	void insertsParaMainRecord(string id,int line);
 	_SymbolTable()
 	{
 		isMainTable = false;
