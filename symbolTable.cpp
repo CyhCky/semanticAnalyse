@@ -35,14 +35,6 @@ void _SymbolRecord::setVarRecord(string id, int line, string detailedType)
 	this->detailedType = detailedType;
 }
 
-/**
- * @brief 设置常量信息
- * 
- * @param id 
- * @param line 行号
- * @param detailedType 具体类型
- * @param value 常量值，使用string存储
- */
 void _SymbolRecord::setConstRecord(string id, int line, string detailedType, string value)
 {
 	type = "const";
