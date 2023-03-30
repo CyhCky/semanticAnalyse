@@ -252,6 +252,6 @@ public:
 	 * @return true 
 	 * @return false 
 	 */
-	bool isIndexInRange(string id,int index);
+	bool isIndexInRange(string id,int dimension,int index);
 };
 #endif

@@ -157,15 +157,31 @@ _SymbolTable::_SymbolTable(string tableName,_SymbolTable* fatherSymbolTable)
 	this->fatherSymbolTable = fatherSymbolTable;
 }
 
+bool _SymbolTable::isRecordExistForId(string id)
+{
+	if(idToLoc.find(id) == idToLoc.end()) 
+		return false;
+	return true;
+}
+
+bool _SymbolTable::convertIdToRecord(string id, _SymbolRecord &record)
+{
+	map<string,int>::iterator t = idToLoc.find(id);
+	if(t != idToLoc.end())//未找到变量
+	{
+		return false;
+	}
+	record = recordList[t->second];//将找到的记录传回
+	return true;//成功找到对应记录
+}
+
 bool _SymbolTable::isVaildid(string id)
 {
 	if(id == tableName)//与符号表名称重名
 	{
 		return false;
 	}
-
-	map<string,int>::iterator t = idToLoc.find(id);
-	if(t != idToLoc.end())//在该层符号表中查到重名变量
+	if(isRecordExistForId(id))//在该层符号表中查到重名变量
 	{
 		return false;
 	}
@@ -179,14 +195,15 @@ bool _SymbolTable::isVaildid(string id)
 		{
 			return false;
 		}
-		t = fatherSymbolTable->idToLoc.find(id);
-		if(t == idToLoc.end())//未在主符号表中找到任意重名变量
+		if(!fatherSymbolTable->isRecordExistForId(id))//未在主符号表中找到任意重名变量
 		{
 			return true;
 		}
 		else 
 		{
-			string recordType = recordList[t->second].type;
+			_SymbolRecord tmpRecord;
+			fatherSymbolTable->convertIdToRecord(id,tmpRecord);
+			string recordType = tmpRecord.type;
 			if(recordType == "var"||recordType == "const"||recordType =="array")//判断重名对象是否是常量或变量或数组名称
 			{
 				return true;
@@ -194,4 +211,22 @@ bool _SymbolTable::isVaildid(string id)
 			else return false;
 		}
 	}
+}
+
+bool _SymbolTable::isIndexInRange(string id, int dimension, int index)
+{
+	if(isRecordExistForId(id))//该符号表下存在同名id
+	{
+		_SymbolRecord tmpRecord;
+		convertIdToRecord(id,tmpRecord);
+		if(tmpRecord.type == "array" && dimension <= tmpRecord.numDimensionsOfArray)//找到对应数组且存在查询维度
+		{
+			auto bounds = tmpRecord.boundsOfArray[dimension-1];
+			if(bounds.first <= index && index <= bounds.second)	
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
