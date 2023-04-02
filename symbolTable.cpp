@@ -164,15 +164,21 @@ bool _SymbolTable::isRecordExistForId(string id)
 	return true;
 }
 
-bool _SymbolTable::convertIdToRecord(string id, _SymbolRecord &record)
+int _SymbolTable::convertIdToRecord(string id, _SymbolRecord &record)
 {
 	map<string,int>::iterator t = idToLoc.find(id);
 	if(t != idToLoc.end())//未找到变量
 	{
-		return false;
+		if(isMainTable == true) 
+			return false;//若已经是主符号表，则找不到对应记录
+		t = fatherSymbolTable->idToLoc.find(id);//查找父符号表
+		if(t != fatherSymbolTable->idToLoc.end())//父符号表中也无对应记录
+			return false;
+		record = fatherSymbolTable->recordList[t->second];
+			return 2;//成功在父符号表中找到对应记录
 	}
 	record = recordList[t->second];//将找到的记录传回
-	return true;//成功找到对应记录
+	return 1;//成功找到对应记录
 }
 
 bool _SymbolTable::isVaildid(string id)
@@ -213,19 +219,14 @@ bool _SymbolTable::isVaildid(string id)
 	}
 }
 
-bool _SymbolTable::isIndexInRange(string id, int dimension, int index)
+bool _SymbolRecord::isIndexInRange(int dimension, int index)
 {
-	if(isRecordExistForId(id))//该符号表下存在同名id
+	if(type == "array" && dimension <= numDimensionsOfArray)//找到对应数组且存在查询维度
 	{
-		_SymbolRecord tmpRecord;
-		convertIdToRecord(id,tmpRecord);
-		if(tmpRecord.type == "array" && dimension <= tmpRecord.numDimensionsOfArray)//找到对应数组且存在查询维度
+		auto bounds = boundsOfArray[dimension-1];
+		if(bounds.first <= index && index <= bounds.second)	
 		{
-			auto bounds = tmpRecord.boundsOfArray[dimension-1];
-			if(bounds.first <= index && index <= bounds.second)	
-			{
-				return true;
-			}
+			return true;
 		}
 	}
 	return false;
