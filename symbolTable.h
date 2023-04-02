@@ -243,19 +243,9 @@ public:
 	 */
 	int convertIdToRecord(string id,_SymbolRecord &record);
 
-	/**
-	 * @brief 判断一个id在该符号表中是否合法,合法返回true,非法返回false
-	 * 
-	 * @param id 
-	 * @return true 
-	 * @return false 
-	 */
-	bool isVaildid(string id);
-
     //查找并返回指定id的子函数或者子过程的所有形参大致类型类型，即para_val或para_var，返回类型为字符串列表
 	vector<string> findAllFormalParaRoughType(string id);
     //查找并返回指定id的子函数或者子过程的所有形参具体类型，即取值为"integer","real","boolean","char"等，返回类型为字符串列表
 	vector<string> findAllFormalParaDetailedType(string id);
-	
 };
 #endif

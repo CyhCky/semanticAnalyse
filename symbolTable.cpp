@@ -8,7 +8,6 @@
  * 
  */
 #include"symbolTable.h"
-#include <iostream>
 using namespace std;
 
 void _SymbolRecord::setParaValRecord(string id,int line,string detailedType)
@@ -231,52 +230,4 @@ bool _SymbolRecord::isIndexInRange(int dimension, int index)
 		}
 	}
 	return false;
-}
-
-//SymbolList从1开始，从0开始把i+1改成i
-vector<string>  _SymbolTable::findAllFormalParaRoughType(string id) 
-{
-	vector<string> typeList;
-	_SymbolRecord record;
-	if(isVaildid(id))
-	   {
-		  convertIdToRecord(id,record);
-		  int count = record.numOfFunc;
-		  if(record.type == "func" || record.type == "proc")
-			for(int i = 0;i < count;i++)
-			{
-				string temptype;
-				temptype = record.subSymbolTable->recordList[i+1].type;
-				typeList.push_back(temptype);
-			}
-		  else
-		   cout << "[_SymbolRecord::findAllFormalParaRoughType] record is not a function or procedure"<< endl;
-	   }
-	else 
-	  cout << "[_SymbolRecord::findAllFormalParaRoughType] id given is not valid"<< endl;
-	return typeList;
-}
-
-//SymbolList从1开始，从0开始把i+1改成i
-vector<string>  _SymbolTable::findAllFormalParaDetailedType(string id) 
-{
-	vector<string> typeList;
-	_SymbolRecord record;
-	if(isVaildid(id))
-	   {
-		  convertIdToRecord(id,record);
-		  int count = record.numOfFunc;
-		  if(record.type == "func" || record.type == "proc")
-			for(int i = 0;i < count;i++)
-			{
-				string temptype;
-				temptype = record.subSymbolTable->recordList[i+1].detailedType;
-				typeList.push_back(temptype);
-			}
-		  else
-		   cout << "[_SymbolRecord::findAllFormalParaDetailedType] record is not a function or procedure"<< endl;
-	   }
-	else 
-	  cout << "[_SymbolRecord::findAllFormalParaDetailedType] id given is not valid"<< endl;
-	return typeList;
 }
