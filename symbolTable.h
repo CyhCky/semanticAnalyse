@@ -117,6 +117,15 @@ public:
 	}
 	~_SymbolRecord(){}
 
+	/**
+	 * @brief 判断数组下标是否合法
+	 * 
+	 * @param index 下标
+	 * @return true 
+	 * @return false 
+	 */
+	bool isIndexInRange(int dimension,int index);
+
 };
 /**
  * @brief 符号表的类定义
@@ -226,14 +235,13 @@ public:
 	bool isRecordExistForId(string id);
 
 	/**
-	 * @brief 使用id得到对应的记录
+	 * @brief 根据id返回对应记录
 	 * 
 	 * @param id 
-	 * @param record 记录返回位置，引用调用
-	 * @return true 成功得到对应记录
-	 * @return false 未成功找到对应记录
+	 * @param record 引用调用，返回需要的记录
+	 * @return * int 0:无此纪录;1:在该表中找到记录;2:在父符号表中找到记录;
 	 */
-	bool convertIdToRecord(string id,_SymbolRecord &record);
+	int convertIdToRecord(string id,_SymbolRecord &record);
 
 	/**
 	 * @brief 判断一个id在该符号表中是否合法,合法返回true,非法返回false
@@ -244,19 +252,10 @@ public:
 	 */
 	bool isVaildid(string id);
 
-	/**
-	 * @brief 判断数组下标是否合法
-	 * 
-	 * @param id 数组id
-	 * @param index 下标
-	 * @return true 
-	 * @return false 
-	 */
-	bool isIndexInRange(string id,int dimension,int index);
-
     //查找并返回指定id的子函数或者子过程的所有形参大致类型类型，即para_val或para_var，返回类型为字符串列表
 	vector<string> findAllFormalParaRoughType(string id);
     //查找并返回指定id的子函数或者子过程的所有形参具体类型，即取值为"integer","real","boolean","char"等，返回类型为字符串列表
 	vector<string> findAllFormalParaDetailedType(string id);
+	
 };
 #endif
