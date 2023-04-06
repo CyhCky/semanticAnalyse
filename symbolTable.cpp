@@ -55,7 +55,8 @@ void _SymbolRecord::setArrayRecord(string id, int line, string detailedType, int
 	this->boundsOfArray = boundsOfArray;
 }
 
-void _SymbolRecord::setFuncRecord(string id, int line, string detailedType, int numOfFunc, _SymbolTable *subSymbolTable)
+void _SymbolRecord::setFuncRecord(string id, int line, string detailedType,\
+									 int numOfFunc, _SymbolTable *subSymbolTable)
 {
 	type = "func";
 	this->id = id;
