@@ -44,7 +44,8 @@ void _SymbolRecord::setConstRecord(string id, int line, string detailedType, str
 	this->constValue = value;
 }
 
-void _SymbolRecord::setArrayRecord(string id, int line, string detailedType, int numDimensionsOfArray, vector<pair<int, int>> boundsOfArray)
+void _SymbolRecord::setArrayRecord(string id, int line, string detailedType, int numDimensionsOfArray,\
+									vector<pair<int, int>> boundsOfArray)
 {
 	type = "array";
 	this->id = id;
@@ -80,76 +81,11 @@ void _SymbolRecord::setParaMainRecord(string id, int line)
 	this->lineNumber = line;
 }
 
-void _SymbolTable::insertParaValRecord(string id, int line, string detailedType)
+void _SymbolTable::insertRecord(_SymbolRecord* tmpRecord)
 {
-	_SymbolRecord* tmpRecord = new _SymbolRecord;
-	tmpRecord->setParaValRecord(id,line,detailedType);
-	idToLoc[id] = recordList.size();
+	idToLoc[tmpRecord->id] = recordList.size();
 	recordList.push_back(*tmpRecord);
 }
-
-void _SymbolTable::insertParaVarRecord(string id, int line, string detailedType)
-{
-	_SymbolRecord* tmpRecord = new _SymbolRecord;
-	tmpRecord->setParaVarRecord(id,line,detailedType);
-	idToLoc[id] = recordList.size();
-	recordList.push_back(*tmpRecord);
-}
-
-void _SymbolTable::insertVarRecord(string id, int line, string detailedType)
-{
-	_SymbolRecord* tmpRecord  = new _SymbolRecord;
-	tmpRecord->setVarRecord(id, line, detailedType);
-	idToLoc[id] = recordList.size();
-	recordList.push_back(*tmpRecord);
-}
-
-
-void _SymbolTable::insertConstRecord(string id, int line, string detailedType, string value)
-{
-	_SymbolRecord *tmpRecord = new _SymbolRecord;
-	tmpRecord->setConstRecord(id, line, detailedType, value);
-	idToLoc[id] = recordList.size();
-	recordList.push_back(*tmpRecord);
-}
-
-
-void _SymbolTable::insertArrayRecord(string id, int line, string detailedType, int numDimensionsOfArray, vector<pair<int, int>> boundsOfArray)
-{
-	_SymbolRecord *tmpRecord = new _SymbolRecord;
-	tmpRecord->setArrayRecord(id, line, detailedType, numDimensionsOfArray, boundsOfArray);
-	idToLoc[id] = recordList.size();
-	recordList.push_back(*tmpRecord);
-}
-
-
-void _SymbolTable::insertFuncRecord(string id, int line, string detailedType, int numOfFunc, _SymbolTable *subSymbolTable)
-{
-	_SymbolRecord *tmpRecord = new _SymbolRecord;
-	tmpRecord->setFuncRecord(id,line,detailedType,numOfFunc,subSymbolTable);
-	idToLoc[id] = recordList.size();
-	recordList.push_back(*tmpRecord);
-}
-
-
-void _SymbolTable::insertProcRecord(string id, int line, int numOfFunc, _SymbolTable *subSymbolTable)
-{
-	_SymbolRecord *tmpRecord = new _SymbolRecord;
-	tmpRecord->setProcRecord(id, line, numOfFunc, subSymbolTable);
-	idToLoc[id] = recordList.size();
-	recordList.push_back(*tmpRecord);
-}
-
-
-
-void _SymbolTable::insertsParaMainRecord(string id, int line)
-{
-	_SymbolRecord *tmpRecord = new _SymbolRecord;
-	tmpRecord->setParaMainRecord(id, line);
-	idToLoc[id] = recordList.size();
-	recordList.push_back(*tmpRecord);
-}
-
 
 _SymbolTable::_SymbolTable(string tableName,_SymbolTable* fatherSymbolTable)
 {
@@ -219,15 +155,47 @@ bool _SymbolTable::isVaildid(string id)
 	}
 }
 
-bool _SymbolRecord::isIndexInRange(int dimension, int index)
+bool _SymbolTable::isIndexInRange(string id, int dimension, int index)
 {
-	if(type == "array" && dimension <= numDimensionsOfArray)//找到对应数组且存在查询维度
+	_SymbolRecord tmpRecord;
+	int t = convertIdToRecord(id,tmpRecord);
+	if(t == 0)
 	{
-		auto bounds = boundsOfArray[dimension-1];
+		return false;
+	}
+	if(tmpRecord.type == "array" && dimension <= tmpRecord.numDimensionsOfArray)//找到对应数组且存在查询维度
+	{
+		auto bounds = tmpRecord.boundsOfArray[dimension-1];
 		if(bounds.first <= index && index <= bounds.second)	
 		{
 			return true;
 		}
 	}
 	return false;
+}
+
+vector<pair<string,string>> _SymbolTable::findAllFormalParaType(string id)
+{
+	vector<pair<string,string>> q;
+	_SymbolRecord tmpRecord;
+	int t = convertIdToRecord(id,tmpRecord);
+	if(t == 0)//未找到记录
+	{
+		string err = "err", noRecord = "noRecord";
+		q.push_back(make_pair(err,noRecord));
+		return q;
+	}
+	if(tmpRecord.type!="func"&&tmpRecord.type!="proc")//记录不为函数/过程类型
+	{
+		string err = "err", wrongType = "wrongType";
+		q.push_back(make_pair(err,wrongType));
+		return q;
+	}
+	_SymbolTable* nowSymbolTable = tmpRecord.subSymbolTable;
+	for(int i = 0;i < tmpRecord.numOfFunc;i++)
+	{
+		q.push_back(make_pair(nowSymbolTable->recordList[i].type,\
+								  nowSymbolTable->recordList[i].detailedType));
+	}
+	return q;
 }

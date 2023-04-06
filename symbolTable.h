@@ -97,8 +97,8 @@ public:
 	 * 
 	 * @param id 
 	 * @param line 行号
-	 * @param numOfFunc 具体类型
-	 * @param subSymbolTable 函数的子符号表
+	 * @param numOfFunc 过程输入参数个数
+	 * @param subSymbolTable 过程的子符号表
 	 */
 	void setProcRecord(string id,int line,int numOfFunc,_SymbolTable* subSymbolTable);
 
@@ -116,16 +116,6 @@ public:
 		subSymbolTable=NULL;
 	}
 	~_SymbolRecord(){}
-
-	/**
-	 * @brief 判断数组下标是否合法
-	 * 
-	 * @param index 下标
-	 * @return true 
-	 * @return false 
-	 */
-	bool isIndexInRange(int dimension,int index);
-
 };
 /**
  * @brief 符号表的类定义
@@ -139,84 +129,14 @@ public:
 	bool isMainTable;//是否为主符号表,是为1,否为0
 	vector< _SymbolRecord > recordList;//存储记录的列表
 	map<string,int> idToLoc;//使用id快速定位符号表中对应记录存放位置
-
-	/**
-	 * @brief 插入传值调用变量记录至符号表中
-	 * 
-	 * @param id 
-	 * @param line 行号
-	 * @param detailedType 具体类型
-	 */
-	void insertParaValRecord(string id,int line,string detailedType);
-
-
-	/**
-	 * @brief 插入引用调用参数记录至符号表中
-	 * 
-	 * @param id 
-	 * @param line 行号
-	 * @param detailedType 具体类型
-	 */
-	void insertParaVarRecord(string id,int line,string detailedType);
-
-	/**
-	 * @brief 插入变量信息记录至符号表中
-	 * 
-	 * @param id 
-	 * @param line 行号
-	 * @param detailedType 具体类型
-	 */
-	void insertVarRecord(string id,int line,string detailedType);
-
-	/**
-	 * @brief 插入常量信息记录至符号表中
-	 * 
-	 * @param id 
-	 * @param line 行号
-	 * @param detailedType 具体类型
-	 * @param value 常量值，使用string类型存储
-	 */
-	void insertConstRecord(string id,int line,string detailedType,string value);
-
-	/**
-	 * @brief 插入数组信息记录进入符号表中
-	 * 
-	 * @param id 
-	 * @param line 行号
-	 * @param detailedType 具体类型
-	 * @param numDimensionsOfArray 数组维数
-	 * @param boundsOfArray 数组每维上下界
-	 */
-	void insertArrayRecord(string id,int line,string detailedType,int numDimensionsOfArray,vector<pair<int,int>> boundsOfArray);
 	
 	/**
-	 * @brief 插入函数信息记录进入符号表中
+	 * @brief 插入已设置好的记录
 	 * 
-	 * @param id 
-	 * @param line 行号
-	 * @param detailedType 具体类型
-	 * @param numOfFunc 函数参数个数
-	 * @param subSymbolTable 函数的子符号表指针 
+	 * @param tmpRecord 已设置好的记录
 	 */
-	void insertFuncRecord(string id,int line,string detailedType,int numOfFunc,_SymbolTable* subSymbolTable);
+	void insertRecord(_SymbolRecord* tmpRecord);
 
-	/**
-	 * @brief 插入过程信息记录至符号表中
-	 * 
-	 * @param id 
-	 * @param line 行号
-	 * @param numOfFunc 过程参数个数
-	 * @param subSymbolTable 过程的子符号表指针
-	 */
-	void insertProcRecord(string id,int line,int numOfFunc,_SymbolTable* subSymbolTable);
-
-	/**
-	 * @brief 插入主函数信息记录至符号表中
-	 * 
-	 * @param id 
-	 * @param line 行号
-	 */
-	void insertsParaMainRecord(string id,int line);
 	_SymbolTable()
 	{
 		isMainTable = false;
@@ -252,10 +172,24 @@ public:
 	 */
 	bool isVaildid(string id);
 
-    //查找并返回指定id的子函数或者子过程的所有形参大致类型类型，即para_val或para_var，返回类型为字符串列表
-	vector<string> findAllFormalParaRoughType(string id);
-    //查找并返回指定id的子函数或者子过程的所有形参具体类型，即取值为"integer","real","boolean","char"等，返回类型为字符串列表
-	vector<string> findAllFormalParaDetailedType(string id);
-	
+	/**
+	 * @brief 判断数组下标是否合法
+	 * 
+	 * @param id 所查找的数组id
+	 * @param dimension 所判断的下标在第几维
+	 * @param index 所判断的下标
+	 * @return true 合法
+	 * @return false 非法
+	 */
+	bool isIndexInRange(string id, int dimension, int index);
+
+	/**
+	 * @brief 获取函数/过程的所有参数的调用类型(引用/传值)及具体类型
+	 * 
+	 * @param id 待获取的函数/过程id
+	 * @return vector<pair<string,string>> 返回的列表
+	 */
+	vector<pair<string,string>> findAllFormalParaType(string id);
+
 };
 #endif
