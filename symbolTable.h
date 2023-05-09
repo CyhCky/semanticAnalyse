@@ -124,7 +124,7 @@ public:
 class _SymbolTable
 {
 public:
-	string tableName;//该符号表名称
+	string tableName,tableDetailedType;//该符号表名称
 	_SymbolTable* fatherSymbolTable;//指向父符号表的指针
 	bool isMainTable;//是否为主符号表,是为1,否为0
 	vector< _SymbolRecord > recordList;//存储记录的列表
