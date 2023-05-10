@@ -72,6 +72,8 @@ void analyseProgram(Program *ast)//分析主程序
 		{
 			addMulDefErrInfo(ast->parameterList[i].first,0,ast->parameterList[i].second,"");
 		}
+		_SymbolRecord *record = new _SymbolRecord;
+		record->setParaMainRecord(ast->parameterList[i].first,ast->parameterList[i].second);//插入主程序参数
 	}
 	//插入4个默认函数
 	_SymbolRecord *readRecord,*writeRecord,*writelnRecord,*exitRecord;
@@ -112,7 +114,7 @@ void analyseSubProgram(SubProgram *ast)
 		curSymbolTable = mainSymbolTable;
 	}
 
-	analyseStatement(ast->compound);
+	analyseStatement((Statement*)(ast->compound));
 }
 
 void analyseConsts(Const *ast)
@@ -123,16 +125,17 @@ void analyseConsts(Const *ast)
 		return;
 	}
 	string id = ast->constId.first;
-	if(curSymbolTable->isVaildid(id))//与主函数，主函数参数重名
-	{
-		addMulDefErrInfo(id,-2,ast->constId.second,"");
-		return;
-	}
+	// if(curSymbolTable->isVaildid(id))//与主函数，主函数参数重名
+	// {
+	// 	addMulDefErrInfo(id,-2,ast->constId.second,"");
+	// 	return;
+	// }
 	_SymbolRecord tmpRecord;
 	int result = curSymbolTable->convertIdToRecord(id,tmpRecord);
 	_SymbolRecord *record = new _SymbolRecord;
 	if(result > 0)//找到重名记录
 	{
+		if(tmpRecord.lineNumber == ast->constId.second) return;//找到自身就跳过，不进行报错
 		addMulDefErrInfo(tmpRecord.id,tmpRecord.lineNumber,ast->constId.second,tmpRecord.type);
 		return;
 	}
@@ -184,6 +187,7 @@ void analyseVariable(Variable *ast)//对变量定义进行语义分析
 	int result = curSymbolTable->convertIdToRecord(id,tmpRecord);
 	if(result > 0)//变量定义重名
 	{
+		if(ast->variableId.second == tmpRecord.lineNumber) return;//找到自身，不进行报错
 		addMulDefErrInfo(id,tmpRecord.lineNumber,line,tmpRecord.type);
 		return;
 	}
@@ -268,7 +272,7 @@ void analyseSubProgramDef(SubprogramDefinition *ast)
 	{
 		analyseVariable(ast->variableList[i]);
 	}
-	analyseStatement(ast->compound);
+	analyseStatement((Statement*)(ast->compound));
 
 	if(type == "proc")//类型为过程，不必检查返回完备
 		return;
@@ -290,8 +294,11 @@ void analyseFormalParameter(FormalParameter *ast)
 	int result = curSymbolTable->convertIdToRecord(id, tmpRecord);
 	if(curSymbolTable->isVaildid(id))
 	{
-		addMulDefErrInfo(id, -2, line, "");	
-		return;	
+		if(tmpRecord.lineNumber != ast->paraId.second)
+		{
+			addMulDefErrInfo(id, -2, line, "");	
+			return;	
+		} 
 	}
 	if(result > 0)//存在重名
 	{
@@ -366,7 +373,12 @@ void analyseStatement(Statement *ast)
 				return;
 			}
 		}
-		else return;
+		else //循环变量未被定义
+		{
+			addUnDefErrInfo(p->id.first, p->id.second);
+			return;
+		}
+		
 
 		string startDetailedType = analyseExpression(p->start);
 		string endDetailedType = analyseExpression(p->end);
@@ -413,24 +425,27 @@ void analyseStatement(Statement *ast)
 
 		if(p->variableReference->kind ==  "function return reference")//若该语句为返回值语句
 		{
-			if(p->variableReference->variableType != rightDetailedType)//左值右值类型不匹配
-			{
-				if(p->variableReference->variableType == "real" && rightDetailedType == "integer");//左侧实数，右侧整数，属于支持的隐式类型转换
-				else
-				 	addStrErrorInfo("[Return Detailed Type Error] <Line: "+ int2str(p->variableReference->variableId.second)\
-									 +"> Function return the wrong detailed type.");
+			if(p->variableReference->variableType != rightDetailedType && (!(p->variableReference->variableType == "real" && rightDetailedType == "integer")))//左值右值类型不匹配
+			{//左侧实数，右侧整数，属于支持的隐式类型转换
+				addStrErrorInfo("[Return Detailed Type Error] <Line: "+ int2str(p->variableReference->variableId.second)\
+									+"> Function return the wrong detailed type.");
+				p->statementType = "error";
 			}
 		}
-
-		if(leftDetailedType != rightDetailedType)//左值右值类型不匹配
+		else
 		{
-			if(leftDetailedType == "real" && rightDetailedType == "integer");//赋值语句左侧实数，右侧整数，支持隐式类型转换，则不报错
-			else
-			{
-				addAssignDetailedTypeDisMatchErrInfo(p->variableReference, p->expression);
-				p->statementType = "error";
-				return;
-			}	
+			p->isReturn = true;
+			return;
+		}
+
+		if(leftDetailedType != rightDetailedType&&(!(leftDetailedType == "real" && rightDetailedType == "integer")))//左值右值类型不匹配
+		{//赋值语句左侧实数，右侧整数，支持隐式类型转换，则不报错
+			addAssignDetailedTypeDisMatchErrInfo(p->variableReference, p->expression);
+			p->statementType = "error";
+		}
+		else
+		{
+			p->statementType = "void";
 		}
 	}
 	else if(ast->type == "procedure")
@@ -461,32 +476,30 @@ void analyseStatement(Statement *ast)
 				{
 					addInputNumErrInfo("exit", p->procedureId.second, p->actualParameterList.size(), 0, "proc");
 					p->statementType = "error";
-					return;
 				}
+				return;
 			}
-			else if(curSymbolTable->tableDetailedType == "func")//为函数的符号表
+			else //为函数的符号表
 			{
 				if(p->actualParameterList.size() != 1)//函数中的exit带一个参数
 				{
 					addInputNumErrInfo("exit", p->procedureId.second, p->actualParameterList.size(), 1, "func");
-					p->statementType = "error";
 					return;
 				}
 				string returnType = analyseExpression(p->actualParameterList[0]);
-				if(returnType != curSymbolTable->tableDetailedType)//返回值与函数类型不同
+				if(returnType != curSymbolTable->tableDetailedType&&(!(curSymbolTable->tableDetailedType == "real" && returnType == "integer")))//返回值与函数类型不同
+				{//隐式类型转换
+					addStrErrorInfo("[Return Detailed Type Error] <Line: "+ int2str(p->procedureId.second)\
+									+"> Function type is \""+curSymbolTable->tableDetailedType+"\" ,but return "\
+									+returnType + ".");
+					p->statementType = "error";
+					
+				}
+				else
 				{
-					if(curSymbolTable->tableDetailedType == "real" && returnType == "integer");//隐式类型转换
-					else
-					{
-						addStrErrorInfo("[Return Detailed Type Error] <Line: "+ int2str(p->procedureId.second)\
-										+"> Function type is \""+curSymbolTable->tableDetailedType+"\" ,but return "\
-										+returnType + ".");
-						p->statementType = "error";
-					}
 					p->isReturn = true;
 					return;
 				}
-
 			}
 		}//exit函数(过程)处理结束
 		if(procRecord.id == "read")//如果是read函数
@@ -496,7 +509,6 @@ void analyseStatement(Statement *ast)
 				addStrErrorInfo("[Read Parameter Missing Error] <Line: "+ int2str(p->procedureId.second)+"> "\
 								+"Read must have at least 1 parameter." );
 				p->statementType = "error";
-				return;
 			}
 			for(int i=0;i<p->actualParameterList.size();i++)
 			{
@@ -523,7 +535,6 @@ void analyseStatement(Statement *ast)
 				addStrErrorInfo("[Write Parameter Missing Error] <Line: "+ int2str(p->procedureId.second)+"> "\
 								+"Write must have at least 1 parameter." );
 				p->statementType = "error";
-				return;
 			}
 		}
 		if(procRecord.numOfFunc == -1)//使用-1来代表变参过程
@@ -536,6 +547,7 @@ void analyseStatement(Statement *ast)
 					p->statementType = "error";
 				}
 			}
+			return;
 		}
 		if(procRecord.numOfFunc != p->actualParameterList.size())//过程定义时参数与调用时参数个数不匹配
 		{
@@ -556,15 +568,11 @@ void analyseStatement(Statement *ast)
 			}
 			if(parameterTable[i].first == "para_val")//为传值调用
 			{
-				if(actualDetailedType != parameterTable[i].second)//类型不匹配
-				{
-					if(actualDetailedType == "integer" && parameterTable[i].second == "integer");//隐式类型转换
-					else
-					{
-						addExpressionDetailedTypeErrInfo(p->actualParameterList[i], actualDetailedType, parameterTable[i].second, \
-						int2str(i+1)+"th parameter");
-						p->statementType = "error";
-					}
+				if(actualDetailedType != parameterTable[i].second&& (!(actualDetailedType == "integer" && parameterTable[i].second == "integer")))//类型不匹配
+				{//隐式类型转换
+					addExpressionDetailedTypeErrInfo(p->actualParameterList[i], actualDetailedType, parameterTable[i].second, \
+					int2str(i+1)+"th parameter");
+					p->statementType = "error";
 				}
 				
 					
